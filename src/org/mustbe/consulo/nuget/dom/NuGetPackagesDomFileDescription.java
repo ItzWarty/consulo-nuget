@@ -57,7 +57,7 @@ public class NuGetPackagesDomFileDescription extends DomFileDescription<NuGetPac
 			return false;
 		}
 		NuGetModuleExtension nuGetModuleExtension = ModuleUtil.getExtension(moduleForPsiElement, NuGetModuleExtension.class);
-		return nuGetModuleExtension != null && Comparing.equal(nuGetModuleExtension.getConfigFile(), virtualFile);
+		return nuGetModuleExtension != null && Comparing.equal(nuGetModuleExtension.getPackagesConfigVirtualFile(), virtualFile);
 	}
 
 	@Nullable

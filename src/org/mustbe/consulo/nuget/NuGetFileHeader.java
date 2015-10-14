@@ -75,12 +75,12 @@ public class NuGetFileHeader extends EditorNotifications.Provider<EditorNotifica
 			return null;
 		}
 
-		if(!Comparing.equal(file, extension.getConfigFile()))
+		if(!Comparing.equal(file, extension.getNuGetConfigFile()))
 		{
 			return null;
 		}
 
-		NuGetPackagesFile packagesFile = extension.getPackagesFile();
+		NuGetPackagesFile packagesFile = extension.getPackagesConfigFile();
 		if(packagesFile == null)
 		{
 			return null;

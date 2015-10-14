@@ -42,11 +42,11 @@ public class NuGetMutableModuleExtension extends NuGetModuleExtension implements
 	{
 		if(StringUtil.isEmptyOrSpaces(path))
 		{
-			myConfigFileUrl = null;
+			myNuGetConfigFileUrl = null;
 		}
 		else
 		{
-			myConfigFileUrl = VirtualFileManager.constructUrl(StandardFileSystems.FILE_PROTOCOL, path);
+			myNuGetConfigFileUrl = VirtualFileManager.constructUrl(StandardFileSystems.FILE_PROTOCOL, path);
 		}
 	}
 
@@ -66,6 +66,6 @@ public class NuGetMutableModuleExtension extends NuGetModuleExtension implements
 	@Override
 	public boolean isModified(@NotNull NuGetModuleExtension nuGetModuleExtension)
 	{
-		return myIsEnabled != nuGetModuleExtension.isEnabled() || !Comparing.equal(myConfigFileUrl, nuGetModuleExtension.myConfigFileUrl);
+		return myIsEnabled != nuGetModuleExtension.isEnabled() || !Comparing.equal(myNuGetConfigFileUrl, nuGetModuleExtension.myPackagesConfigFileUrl);
 	}
 }

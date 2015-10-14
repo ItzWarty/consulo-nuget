@@ -43,41 +43,85 @@ public class NuGetConfigPanel extends JPanel
 	{
 		super(new VerticalFlowLayout(VerticalFlowLayout.TOP));
 
-		val textField = new JBTextField();
-
-		textField.getEmptyText().setText(VfsUtil.urlToPath(moduleExtension.getModule().getModuleDirUrl() + "/" + NuGetModuleExtension
-				.PACKAGES_CONFIG));
-
-		String configFileUrl = moduleExtension.getConfigFileUrl();
-		if(!StringUtil.isEmpty(configFileUrl))
-		{
-			textField.setText(FileUtil.toSystemDependentName(VfsUtil.urlToPath(configFileUrl)));
-		}
-
-		val browseButton = new TextFieldWithBrowseButton(textField);
-		browseButton.addBrowseFolderListener("Select File", "Select NuGet package config file", moduleExtension.getProject(),
-				FileChooserDescriptorFactory.createSingleFileDescriptor(XmlFileType.INSTANCE), new TextComponentAccessor<JTextField>()
-		{
-			@Override
-			public String getText(JTextField component)
-			{
-				return FileUtil.toSystemDependentName(component.getText());
-			}
-
-			@Override
-			public void setText(JTextField component, String text)
-			{
-				component.setText(FileUtil.toSystemDependentName(text));
-			}
-		});
-		textField.getDocument().addDocumentListener(new DocumentAdapter()
-		{
-			@Override
-			protected void textChanged(DocumentEvent e)
-			{
-				moduleExtension.setConfigFilePath(FileUtil.toSystemIndependentName(textField.getText()));
-			}
-		});
-		add(LabeledComponent.left(browseButton, "Config file:"));
+        AddNugetConfigFileSelector(moduleExtension);
+        AddPackagesConfigFileSelector(moduleExtension);
 	}
+
+    private void AddNugetConfigFileSelector(final NuGetMutableModuleExtension moduleExtension) {
+        val textField = new JBTextField();
+
+        textField.getEmptyText().setText(VfsUtil.urlToPath(moduleExtension.getModule().getModuleDirUrl() + "/" + NuGetModuleExtension
+                .PACKAGES_CONFIG));
+
+        String packagesConfigFileUrl = moduleExtension.getPackagesConfigFileUrl();
+        if(!StringUtil.isEmpty(packagesConfigFileUrl))
+        {
+            textField.setText(FileUtil.toSystemDependentName(VfsUtil.urlToPath(packagesConfigFileUrl)));
+        }
+
+        val browseButton = new TextFieldWithBrowseButton(textField);
+        browseButton.addBrowseFolderListener("Select File", "Select NuGet package config file", moduleExtension.getProject(),
+                FileChooserDescriptorFactory.createSingleFileDescriptor(XmlFileType.INSTANCE), new TextComponentAccessor<JTextField>()
+        {
+            @Override
+            public String getText(JTextField component)
+            {
+                return FileUtil.toSystemDependentName(component.getText());
+            }
+
+            @Override
+            public void setText(JTextField component, String text)
+            {
+                component.setText(FileUtil.toSystemDependentName(text));
+            }
+        });
+        textField.getDocument().addDocumentListener(new DocumentAdapter()
+        {
+            @Override
+            protected void textChanged(DocumentEvent e)
+            {
+                moduleExtension.setConfigFilePath(FileUtil.toSystemIndependentName(textField.getText()));
+            }
+        });
+        add(LabeledComponent.left(browseButton, "packages.config:"));
+    }
+
+    private void AddPackagesConfigFileSelector(final NuGetMutableModuleExtension moduleExtension) {
+        val textField = new JBTextField();
+
+        textField.getEmptyText().setText(VfsUtil.urlToPath(moduleExtension.getModule().getModuleDirUrl() + "/" + NuGetModuleExtension
+                .PACKAGES_CONFIG));
+
+        String configFileUrl = moduleExtension.getPackagesConfigFileUrl();
+        if(!StringUtil.isEmpty(configFileUrl))
+        {
+            textField.setText(FileUtil.toSystemDependentName(VfsUtil.urlToPath(configFileUrl)));
+        }
+
+        val browseButton = new TextFieldWithBrowseButton(textField);
+        browseButton.addBrowseFolderListener("Select File", "Select NuGet package config file", moduleExtension.getProject(),
+                FileChooserDescriptorFactory.createSingleFileDescriptor(XmlFileType.INSTANCE), new TextComponentAccessor<JTextField>()
+        {
+            @Override
+            public String getText(JTextField component)
+            {
+                return FileUtil.toSystemDependentName(component.getText());
+            }
+
+            @Override
+            public void setText(JTextField component, String text)
+            {
+                component.setText(FileUtil.toSystemDependentName(text));
+            }
+        });
+        textField.getDocument().addDocumentListener(new DocumentAdapter()
+        {
+            @Override
+            protected void textChanged(DocumentEvent e)
+            {
+                moduleExtension.setConfigFilePath(FileUtil.toSystemIndependentName(textField.getText()));
+            }
+        });
+        add(LabeledComponent.left(browseButton, "Config file:"));
+    }
 }

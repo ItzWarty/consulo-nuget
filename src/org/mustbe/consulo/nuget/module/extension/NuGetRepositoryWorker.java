@@ -33,7 +33,7 @@ public class NuGetRepositoryWorker extends NuGetBasedRepositoryWorker
 
 	public NuGetRepositoryWorker(NuGetModuleExtension extension)
 	{
-		super(extension.getModule());
+		super(extension.getModule(), extension.getNuGetConfigFile());
 		myExtension = extension;
 	}
 
@@ -52,7 +52,7 @@ public class NuGetRepositoryWorker extends NuGetBasedRepositoryWorker
 	@Override
 	protected void loadDefinedPackages(@NotNull Consumer<PackageInfo> packageInfoConsumer)
 	{
-		val packagesFile = myExtension.getPackagesFile();
+		val packagesFile = myExtension.getPackagesConfigFile();
 		if(packagesFile == null)
 		{
 			return;

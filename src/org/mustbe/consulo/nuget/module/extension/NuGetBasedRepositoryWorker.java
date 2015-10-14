@@ -24,6 +24,7 @@ import org.mustbe.consulo.nuget.api.NuGetPackageEntry;
 import org.mustbe.consulo.nuget.api.NuGetPackageEntryParser;
 import org.mustbe.consulo.nuget.api.NuGetTargetFrameworkInfo;
 import org.mustbe.consulo.nuget.api.NuGetVersion;
+import org.mustbe.consulo.nuget.dom.NuGetConfigFile;
 import org.mustbe.consulo.nuget.util.NuPkgUtil;
 import com.intellij.BundleBase;
 import com.intellij.ide.highlighter.XmlFileType;
@@ -147,10 +148,12 @@ public abstract class NuGetBasedRepositoryWorker
 
 	protected final AtomicBoolean myProgress = new AtomicBoolean();
 	protected final Module myModule;
+    protected final NuGetConfigFile myNugetConfigFile;
 
-	public NuGetBasedRepositoryWorker(Module module)
+	public NuGetBasedRepositoryWorker(Module module, NuGetConfigFile nugetConfigFile)
 	{
 		myModule = module;
+        myNugetConfigFile = nugetConfigFile;
 	}
 
 	@Nullable
@@ -444,7 +447,7 @@ public abstract class NuGetBasedRepositoryWorker
 		{
 			try
 			{
-				indicator.setText("NuGet: Getting info about " + id + " package from " + url);
+				indicator.setText("NuGet: Ge(*@#$(*tting info about " + id + " package from " + url);
 
 				Map<String, NuGetPackageEntry> map = requestQueue.request(BundleBase.format(ourPackagesFilterPattern, url, id),
 						new HttpRequests.RequestProcessor<Map<String, NuGetPackageEntry>>()

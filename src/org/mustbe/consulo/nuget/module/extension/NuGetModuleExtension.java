@@ -16,11 +16,15 @@
 
 package org.mustbe.consulo.nuget.module.extension;
 
+import com.intellij.util.xml.DomElement;
+import com.intellij.util.xml.DomFileElement;
+import com.intellij.util.xml.DomManager;
 import org.consulo.lombok.annotations.LazyInstance;
 import org.consulo.module.extension.impl.ModuleExtensionImpl;
 import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.mustbe.consulo.nuget.dom.NuGetConfigFile;
 import org.mustbe.consulo.nuget.dom.NuGetPackagesFile;
 import com.intellij.openapi.roots.ModuleRootLayer;
 import com.intellij.openapi.util.text.StringUtil;
@@ -29,8 +33,6 @@ import com.intellij.openapi.vfs.VirtualFileManager;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
 import com.intellij.psi.xml.XmlFile;
-import com.intellij.util.xml.DomFileElement;
-import com.intellij.util.xml.DomManager;
 
 /**
  * @author VISTALL
@@ -38,9 +40,16 @@ import com.intellij.util.xml.DomManager;
  */
 public class NuGetModuleExtension extends ModuleExtensionImpl<NuGetModuleExtension>
 {
-	public static final String PACKAGES_CONFIG = "packages.config";
+    public static final String NUGET_CONFIG = "NuGet.Config";
+    public static final String PACKAGES_CONFIG = "packages.config";
 
-	protected String myConfigFileUrl;
+    private static final String NUGET_CONFIG_FILE_URL_KEY = "config-file-url";
+    private static final String PACKAGES_FILE_URL_KEY = "packages-file-url";
+
+    private static final int NUGET_CONFIG_SEARCH_DEPTH = 3;
+
+    protected String myNuGetConfigFileUrl;
+    protected String myPackagesConfigFileUrl;
 
 	public NuGetModuleExtension(@NotNull String id, @NotNull ModuleRootLayer moduleRootLayer)
 	{
@@ -51,22 +60,28 @@ public class NuGetModuleExtension extends ModuleExtensionImpl<NuGetModuleExtensi
 	public void commit(@NotNull NuGetModuleExtension mutableModuleExtension)
 	{
 		super.commit(mutableModuleExtension);
-		myConfigFileUrl = StringUtil.nullize(mutableModuleExtension.myConfigFileUrl, true);
+        myNuGetConfigFileUrl = StringUtil.nullize(mutableModuleExtension.myNuGetConfigFileUrl, true);
+        myPackagesConfigFileUrl = StringUtil.nullize(mutableModuleExtension.myPackagesConfigFileUrl, true);
 	}
 
 	@Override
 	protected void getStateImpl(@NotNull Element element)
 	{
-		if(myConfigFileUrl != null)
+        if(myNuGetConfigFileUrl != null)
+        {
+            element.setAttribute(NUGET_CONFIG_FILE_URL_KEY, myNuGetConfigFileUrl);
+        }
+		if(myPackagesConfigFileUrl != null)
 		{
-			element.setAttribute("config-file-url", myConfigFileUrl);
+            element.setAttribute(PACKAGES_FILE_URL_KEY, myPackagesConfigFileUrl);
 		}
 	}
 
 	@Override
 	protected void loadStateImpl(@NotNull Element element)
 	{
-		myConfigFileUrl = element.getAttributeValue("config-file-url");
+        myNuGetConfigFileUrl = element.getAttributeValue(NUGET_CONFIG_FILE_URL_KEY);
+        myPackagesConfigFileUrl = element.getAttributeValue(PACKAGES_FILE_URL_KEY);
 	}
 
 	@NotNull
@@ -76,41 +91,70 @@ public class NuGetModuleExtension extends ModuleExtensionImpl<NuGetModuleExtensi
 		return new NuGetRepositoryWorker(NuGetModuleExtension.this);
 	}
 
-	public String getConfigFileUrl()
-	{
-		return myConfigFileUrl;
-	}
+    @Nullable
+    public VirtualFile getNuGetConfigVirtualFile()
+    {
+        return getModuleVirtualFileBySpecifiedPathAndFallbackName(myNuGetConfigFileUrl, NUGET_CONFIG);
+    }
 
 	@Nullable
-	public VirtualFile getConfigFile()
+	public NuGetConfigFile getNuGetConfigFile()
 	{
-		if(StringUtil.isEmpty(myConfigFileUrl))
-		{
-			VirtualFile moduleDir = getModule().getModuleDir();
-			if(moduleDir == null)
-			{
-				return null;
-			}
-			return moduleDir.findFileByRelativePath(PACKAGES_CONFIG);
-		}
-		return VirtualFileManager.getInstance().findFileByUrl(myConfigFileUrl);
+        return getXmlFileBySpecifiedPathAndFallbackName(myNuGetConfigFileUrl, NUGET_CONFIG, NuGetConfigFile.class);
 	}
 
+    public String getPackagesConfigFileUrl()
+    {
+        return myPackagesConfigFileUrl;
+    }
+
+    @Nullable
+    public VirtualFile getPackagesConfigVirtualFile()
+    {
+        return getModuleVirtualFileBySpecifiedPathAndFallbackName(myPackagesConfigFileUrl, PACKAGES_CONFIG);
+    }
+
 	@Nullable
-	public NuGetPackagesFile getPackagesFile()
+	public NuGetPackagesFile getPackagesConfigFile()
 	{
-		VirtualFile fileByRelativePath = getConfigFile();
-		if(fileByRelativePath == null)
-		{
-			return null;
-		}
-		PsiFile maybeXmlFile = PsiManager.getInstance(getProject()).findFile(fileByRelativePath);
-		if(!(maybeXmlFile instanceof XmlFile))
-		{
-			return null;
-		}
-		DomFileElement<NuGetPackagesFile> fileElement = DomManager.getDomManager(getProject()).getFileElement((XmlFile) maybeXmlFile,
-				NuGetPackagesFile.class);
-		return fileElement == null ? null : fileElement.getRootElement();
+        return getXmlFileBySpecifiedPathAndFallbackName(myPackagesConfigFileUrl, PACKAGES_CONFIG, NuGetPackagesFile.class);
+	}
+
+    @Nullable
+    private VirtualFile getModuleVirtualFileBySpecifiedPathAndFallbackName(@Nullable String specifiedPath, String fallbackFileName)
+    {
+        VirtualFile file = null;
+        if (!StringUtil.isEmpty(specifiedPath))
+        {
+            file = VirtualFileManager.getInstance().findFileByUrl(specifiedPath);
+        }
+        if (file == null)
+        {
+            VirtualFile currentDirectory = getModule().getModuleDir();
+            for (int i = 0; i < NUGET_CONFIG_SEARCH_DEPTH && file == null; i++)
+            {
+                file = currentDirectory.findFileByRelativePath(fallbackFileName);
+                currentDirectory = currentDirectory.getParent();
+            }
+        }
+        return file;
+    }
+
+	@Nullable
+	private <T extends DomElement> T getXmlFileBySpecifiedPathAndFallbackName(@Nullable String specifiedPath, String fallbackFileName, Class<T> tClass)
+    {
+        VirtualFile file = getModuleVirtualFileBySpecifiedPathAndFallbackName(specifiedPath, fallbackFileName);
+        if (file == null)
+        {
+            return null;
+        }
+
+        PsiFile maybeXmlFile = PsiManager.getInstance(getProject()).findFile(file);
+        if(!(maybeXmlFile instanceof XmlFile))
+        {
+            return null;
+        }
+        DomFileElement<T> fileElement = DomManager.getDomManager(getProject()).getFileElement((XmlFile) maybeXmlFile, tClass);
+        return fileElement == null ? null : fileElement.getRootElement();
 	}
 }
