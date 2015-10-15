@@ -45,10 +45,15 @@ public class NuGetRequestQueue
 		T value = null;
 		try
 		{
-			value = HttpRequests.request(url).accept("*/*").gzip(false).connect(requestProcessor);
+//            value = HttpRequests.request(url).accept("*/*").gzip(false).connect(requestProcessor);
+            value = HttpRequests.request(url).accept("application/atom+xml").connect(requestProcessor);
+//            value = HttpRequests.request(url).accept("application/atom+xml").gzip(false).connect(requestProcessor);
+//			value = HttpRequests.request(url).connect(requestProcessor);
 		}
 		catch(IOException e)
 		{
+            System.out.println("Failed to execute url: " + url);
+            System.out.println(e);
 			LOGGER.warn("Failed to execute url: " + url, e);
 		}
 

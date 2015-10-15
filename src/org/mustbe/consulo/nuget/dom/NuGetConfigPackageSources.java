@@ -18,23 +18,18 @@ package org.mustbe.consulo.nuget.dom;
 
 import com.intellij.util.xml.Attribute;
 import com.intellij.util.xml.DomElement;
-import com.intellij.util.xml.GenericAttributeValue;
 import com.intellij.util.xml.Required;
+import com.intellij.util.xml.SubTagList;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
 
 /**
  * @author warty
- * @since 10/14/15.
+ * @since 10/15/15.
  */
-public interface AddedNuGetPackageSource extends DomElement
+public interface NuGetConfigPackageSources extends DomElement
 {
     @NotNull
-    @Attribute
-    @Required
-    GenericAttributeValue<String> getKey();
-
-    @NotNull
-    @Attribute
-    @Required
-    GenericAttributeValue<String> getValue();
+    List<AddedNuGetPackageSource> getAdds();
 }

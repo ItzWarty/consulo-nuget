@@ -31,6 +31,7 @@ import com.intellij.util.ArrayUtil;
 import com.intellij.util.Consumer;
 import com.intellij.util.io.DownloadUtil;
 import com.intellij.util.io.HttpRequests;
+import com.intellij.util.xml.GenericAttributeValue;
 import gnu.trove.THashMap;
 import lombok.val;
 import org.consulo.lombok.annotations.Logger;
@@ -41,7 +42,9 @@ import org.jetbrains.annotations.Nullable;
 import org.mustbe.consulo.RequiredReadAction;
 import org.mustbe.consulo.dotnet.dll.DotNetModuleFileType;
 import org.mustbe.consulo.nuget.api.*;
+import org.mustbe.consulo.nuget.dom.AddedNuGetPackageSource;
 import org.mustbe.consulo.nuget.dom.NuGetConfigFile;
+import org.mustbe.consulo.nuget.dom.NuGetConfigPackageSources;
 import org.mustbe.consulo.nuget.util.NuPkgUtil;
 
 import java.io.File;
@@ -135,7 +138,8 @@ public abstract class NuGetBasedRepositoryWorker
 	public static final String NUGET_LIBRARY_PREFIX = "nuget: ";
 	public static final String PACKAGES_DIR = "packages";
 
-	private static final String ourPackagesFilterPattern = "{0}/Packages()?$filter=Id%20eq%20%27{1}%27&includePrerelease=true";
+    // https://www.nuget.org/api/v2/FindPackagesById()?id=%27Microsoft.AspNet.Server.Kestrel%27&includePrerelease=true
+	private static final String ourPackagesFilterPattern = "{0}/FindPackagesById()?id=%27{1}%27&includePrerelease=true";
 
 	protected final AtomicBoolean myProgress = new AtomicBoolean();
 	protected final Module myModule;
@@ -168,7 +172,14 @@ public abstract class NuGetBasedRepositoryWorker
 			@Override
 			public List<String> getRepositories()
 			{
-				return Collections.singletonList("http://nuget.org/api/v2");
+                List<String> result = new ArrayList<String>();
+                NuGetConfigPackageSources nuGetConfigPackageSources = myNugetConfigFile.getPackageSources();
+				for (AddedNuGetPackageSource packageSource : nuGetConfigPackageSources.getAdds())
+                {
+					GenericAttributeValue<String> packageSourceUrl = packageSource.getValue();
+					result.add(packageSourceUrl.getValue());
+                }
+				return result;
 			}
 		};
 	}
@@ -434,20 +445,26 @@ public abstract class NuGetBasedRepositoryWorker
 			@NotNull final NuGetRequestQueue requestQueue,
 			@NotNull final String id)
 	{
-		for(final String url : repositoryManager.getRepositories())
+        List<String> repositories = repositoryManager.getRepositories();
+		for(final String url : repositories)
 		{
 			try
 			{
-				indicator.setText("NuGet: Ge(*@#$(*tting info about " + id + " package from " + url);
+                indicator.setText("NuGet: " + repositories.size() + "Ge(*@#$(*tting info about " + id + " package from " + url);
+                try { Thread.sleep(500); } catch (Exception e) { }
 
-				Map<String, NuGetPackageEntry> map = requestQueue.request(BundleBase.format(ourPackagesFilterPattern, url, id),
+                final String requestUrl = BundleBase.format(ourPackagesFilterPattern, url, id);
+				Map<String, NuGetPackageEntry> map = requestQueue.request(requestUrl,
 						new HttpRequests.RequestProcessor<Map<String, NuGetPackageEntry>>()
 
 				{
 					@Override
 					public Map<String, NuGetPackageEntry> process(@NotNull HttpRequests.Request request) throws IOException
 					{
-						if(!request.isSuccessful())
+                        indicator.setText("Success: " + request.isSuccessful() + " " + requestUrl + " " + request.toString());
+                        try { Thread.sleep(500); } catch (Exception e) { }
+
+                        if(!request.isSuccessful())
 						{
 							return null;
 						}
@@ -463,10 +480,16 @@ public abstract class NuGetBasedRepositoryWorker
 					}
 				});
 
+                indicator.setText("NuGet: " + (map == null) + " // " + repositories.size() + "Ge(*@#$(*tting info about " + id + " package from " + url);
+                try { Thread.sleep(500); } catch (Exception e) { }
+
 				if(map == null)
 				{
 					continue;
 				}
+
+                indicator.setText("NuGet: " + map.size() + " // " + repositories.size() + "Ge(*@#$(*tting info about " + id + " package from " + url);
+                try { Thread.sleep(500); } catch (Exception e) { }
 
 				return map;
 			}

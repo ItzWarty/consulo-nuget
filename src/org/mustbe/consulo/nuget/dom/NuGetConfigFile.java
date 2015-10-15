@@ -25,9 +25,9 @@ import java.util.List;
  * @author warty
  * @since 10/14/15.
  */
-public interface NuGetConfigFile extends DomElement {
+public interface NuGetConfigFile extends DomElement
+{
     @NotNull
-    @SubTagList("packageSources")
-    @Required
-    GenericAttributeValue<List<AddedNuGetPackageSource>> getPackageSources();
+    @SubTag("packageSources")
+    NuGetConfigPackageSources getPackageSources();
 }
