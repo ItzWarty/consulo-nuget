@@ -38,17 +38,29 @@ public class NuGetMutableModuleExtension extends NuGetModuleExtension implements
 		super(id, moduleRootLayer);
 	}
 
-	public void setConfigFilePath(String path)
-	{
-		if(StringUtil.isEmptyOrSpaces(path))
-		{
-			myNuGetConfigFileUrl = null;
-		}
-		else
-		{
-			myNuGetConfigFileUrl = VirtualFileManager.constructUrl(StandardFileSystems.FILE_PROTOCOL, path);
-		}
-	}
+    public void setNuGetConfigFilePath(String path)
+    {
+        if(StringUtil.isEmptyOrSpaces(path))
+        {
+            myNuGetConfigFileUrl = null;
+        }
+        else
+        {
+            myNuGetConfigFileUrl = VirtualFileManager.constructUrl(StandardFileSystems.FILE_PROTOCOL, path);
+        }
+    }
+
+    public void setPackagesConfigFilePath(String path)
+    {
+        if(StringUtil.isEmptyOrSpaces(path))
+        {
+            myPackagesConfigFileUrl = null;
+        }
+        else
+        {
+            myPackagesConfigFileUrl = VirtualFileManager.constructUrl(StandardFileSystems.FILE_PROTOCOL, path);
+        }
+    }
 
 	@Nullable
 	@Override
@@ -66,6 +78,8 @@ public class NuGetMutableModuleExtension extends NuGetModuleExtension implements
 	@Override
 	public boolean isModified(@NotNull NuGetModuleExtension nuGetModuleExtension)
 	{
-		return myIsEnabled != nuGetModuleExtension.isEnabled() || !Comparing.equal(myNuGetConfigFileUrl, nuGetModuleExtension.myPackagesConfigFileUrl);
+		return myIsEnabled != nuGetModuleExtension.isEnabled() ||
+                !Comparing.equal(myNuGetConfigFileUrl, nuGetModuleExtension.myNuGetConfigFileUrl) ||
+                !Comparing.equal(myPackagesConfigFileUrl, nuGetModuleExtension.myPackagesConfigFileUrl);
 	}
 }

@@ -43,24 +43,25 @@ public class NuGetConfigPanel extends JPanel
 	{
 		super(new VerticalFlowLayout(VerticalFlowLayout.TOP));
 
-        AddNugetConfigFileSelector(moduleExtension);
+        AddNuGetConfigFileSelector(moduleExtension);
         AddPackagesConfigFileSelector(moduleExtension);
 	}
 
-    private void AddNugetConfigFileSelector(final NuGetMutableModuleExtension moduleExtension) {
+    private void AddNuGetConfigFileSelector(final NuGetMutableModuleExtension moduleExtension)
+    {
         val textField = new JBTextField();
 
         textField.getEmptyText().setText(VfsUtil.urlToPath(moduleExtension.getModule().getModuleDirUrl() + "/" + NuGetModuleExtension
-                .PACKAGES_CONFIG));
+                .NUGET_CONFIG));
 
-        String packagesConfigFileUrl = moduleExtension.getPackagesConfigFileUrl();
-        if(!StringUtil.isEmpty(packagesConfigFileUrl))
+        String nugetConfigFileUrl = moduleExtension.getPackagesConfigFileUrl();
+        if(!StringUtil.isEmpty(nugetConfigFileUrl))
         {
-            textField.setText(FileUtil.toSystemDependentName(VfsUtil.urlToPath(packagesConfigFileUrl)));
+            textField.setText(FileUtil.toSystemDependentName(VfsUtil.urlToPath(nugetConfigFileUrl)));
         }
 
         val browseButton = new TextFieldWithBrowseButton(textField);
-        browseButton.addBrowseFolderListener("Select File", "Select NuGet package config file", moduleExtension.getProject(),
+        browseButton.addBrowseFolderListener("Select File", "Select NuGet Config file", moduleExtension.getProject(),
                 FileChooserDescriptorFactory.createSingleFileDescriptor(XmlFileType.INSTANCE), new TextComponentAccessor<JTextField>()
         {
             @Override
@@ -80,10 +81,10 @@ public class NuGetConfigPanel extends JPanel
             @Override
             protected void textChanged(DocumentEvent e)
             {
-                moduleExtension.setConfigFilePath(FileUtil.toSystemIndependentName(textField.getText()));
+                moduleExtension.setNuGetConfigFilePath(FileUtil.toSystemIndependentName(textField.getText()));
             }
         });
-        add(LabeledComponent.left(browseButton, "packages.config:"));
+        add(LabeledComponent.left(browseButton, "NuGet.Config:"));
     }
 
     private void AddPackagesConfigFileSelector(final NuGetMutableModuleExtension moduleExtension) {
@@ -99,7 +100,7 @@ public class NuGetConfigPanel extends JPanel
         }
 
         val browseButton = new TextFieldWithBrowseButton(textField);
-        browseButton.addBrowseFolderListener("Select File", "Select NuGet package config file", moduleExtension.getProject(),
+        browseButton.addBrowseFolderListener("Select File", "Select NuGet Packages config file", moduleExtension.getProject(),
                 FileChooserDescriptorFactory.createSingleFileDescriptor(XmlFileType.INSTANCE), new TextComponentAccessor<JTextField>()
         {
             @Override
@@ -119,9 +120,9 @@ public class NuGetConfigPanel extends JPanel
             @Override
             protected void textChanged(DocumentEvent e)
             {
-                moduleExtension.setConfigFilePath(FileUtil.toSystemIndependentName(textField.getText()));
+                moduleExtension.setPackagesConfigFilePath(FileUtil.toSystemIndependentName(textField.getText()));
             }
         });
-        add(LabeledComponent.left(browseButton, "Config file:"));
+        add(LabeledComponent.left(browseButton, "packages.config:"));
     }
 }

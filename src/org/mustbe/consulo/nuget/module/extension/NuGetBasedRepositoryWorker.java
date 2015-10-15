@@ -1,36 +1,11 @@
 package org.mustbe.consulo.nuget.module.extension;
 
-import gnu.trove.THashMap;
-
-import java.io.File;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import org.consulo.lombok.annotations.Logger;
-import org.jdom.Element;
-import org.jdom.JDOMException;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.mustbe.consulo.RequiredReadAction;
-import org.mustbe.consulo.dotnet.dll.DotNetModuleFileType;
-import org.mustbe.consulo.nuget.api.NuGetDependency;
-import org.mustbe.consulo.nuget.api.NuGetPackageEntry;
-import org.mustbe.consulo.nuget.api.NuGetPackageEntryParser;
-import org.mustbe.consulo.nuget.api.NuGetTargetFrameworkInfo;
-import org.mustbe.consulo.nuget.api.NuGetVersion;
-import org.mustbe.consulo.nuget.dom.NuGetConfigFile;
-import org.mustbe.consulo.nuget.util.NuPkgUtil;
 import com.intellij.BundleBase;
 import com.intellij.ide.highlighter.XmlFileType;
 import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
+import com.intellij.openapi.roots.types.BinariesOrderRootType;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.Result;
 import com.intellij.openapi.application.WriteAction;
@@ -43,7 +18,6 @@ import com.intellij.openapi.roots.OrderEntry;
 import com.intellij.openapi.roots.impl.ModuleLibraryOrderEntryImpl;
 import com.intellij.openapi.roots.libraries.Library;
 import com.intellij.openapi.roots.libraries.LibraryTable;
-import com.intellij.openapi.roots.types.BinariesOrderRootType;
 import com.intellij.openapi.roots.types.DocumentationOrderRootType;
 import com.intellij.openapi.util.Computable;
 import com.intellij.openapi.util.JDOMUtil;
@@ -57,7 +31,24 @@ import com.intellij.util.ArrayUtil;
 import com.intellij.util.Consumer;
 import com.intellij.util.io.DownloadUtil;
 import com.intellij.util.io.HttpRequests;
+import gnu.trove.THashMap;
 import lombok.val;
+import org.consulo.lombok.annotations.Logger;
+import org.jdom.Element;
+import org.jdom.JDOMException;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.mustbe.consulo.RequiredReadAction;
+import org.mustbe.consulo.dotnet.dll.DotNetModuleFileType;
+import org.mustbe.consulo.nuget.api.*;
+import org.mustbe.consulo.nuget.dom.NuGetConfigFile;
+import org.mustbe.consulo.nuget.util.NuPkgUtil;
+
+import java.io.File;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author VISTALL
